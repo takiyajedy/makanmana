@@ -25,7 +25,7 @@ Route::middleware('auth')->group(function () {
 
     //recommendation 
     Route::get('/recommendation', [RecommendationController::class, 'index'])->name('recommend.index');
-     Route::get('/recommendation-map', [\App\Http\Controllers\RecommendationController::class, 'mapRecommendation'])->name('recommendation.map');
+     Route::get('/recommendation-map', [RecommendationController::class, 'mapRecommendation'])->name('recommendation.map');
 
     //restaurant
     Route::get('/restaurants', [RestaurantController::class, 'index'])->name('restaurants.index');
