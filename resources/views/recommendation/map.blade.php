@@ -10,7 +10,7 @@
             <label for="distanceSlider" class="form-label fw-bold">
                 Max Distance: <span id="distanceValue">5</span> km
             </label>
-            <input type="range" class="form-range" id="distanceSlider" min="1" max="20" step="1" value="5">
+            <input type="range" class="form-range" id="distanceSlider" min="1" max="500" step="1" value="5">
         </div>
 
         <button id="chooseBtn" class="btn btn-primary mb-3">Choose for me</button>
