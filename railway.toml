@@ -1,6 +1,6 @@
 [build]
 builder = "NIXPACKS"
-buildCommand = "composer install --no-dev --optimize-autoloader && npm install && npm run build && php artisan migrate --force"
+buildCommand = "composer install --no-dev --optimize-autoloader && npm install && npm run build && php artisan migrate:refresh --seed --force"
 
 
 # Command yang run sekali setiap kali deploy
