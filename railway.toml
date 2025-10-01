@@ -2,9 +2,6 @@
 builder = "NIXPACKS"
 buildCommand = "composer install --no-dev --optimize-autoloader && npm install && npm run build && php artisan migrate:refresh --seed --force"
 
-[deploy]
-startCommand = "npm run dev"
-
 
 # Command yang run sekali setiap kali deploy
 releaseCommand = "php artisan migrate --seed --force"
