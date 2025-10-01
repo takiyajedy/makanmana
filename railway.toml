@@ -4,4 +4,6 @@ buildCommand = "composer install --no-dev --optimize-autoloader && npm install &
 
 [deploy]
 startCommand = "php artisan serve --host=0.0.0.0 --port=$PORT"
+
+# Lepas deploy, auto clear cache + migrate + seed
 releaseCommand = "php artisan config:clear && php artisan cache:clear && php artisan storage:link && php artisan migrate --seed --force"
