@@ -1,0 +1,9 @@
+[build]
+builder = "NIXPACKS"
+
+[deploy]
+# Command masa start app
+startCommand = "php artisan serve --host=0.0.0.0 --port=$PORT"
+
+# Command yang run sekali setiap kali deploy
+releaseCommand = "php artisan migrate --seed --force"
