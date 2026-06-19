@@ -1,47 +1,53 @@
 <x-guest-layout>
-    <!-- Session Status -->
-    <x-auth-session-status class="mb-4" :status="session('status')" />
+    <a href="{{ route('landing') }}" class="auth-back">← Kembali ke laman utama</a>
+
+    <div class="auth-head">
+        <h1>Selamat kembali 👋</h1>
+        <p>Log masuk untuk teruskan mencari tempat makan.</p>
+    </div>
+
+    @if (session('status'))
+        <div class="auth-status">{{ session('status') }}</div>
+    @endif
 
     <form method="POST" action="{{ route('login') }}">
         @csrf
 
-        <!-- Email Address -->
-        <div>
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autofocus autocomplete="username" />
-            <x-input-error :messages="$errors->get('email')" class="mt-2" />
+        <div class="auth-field">
+            <label class="auth-label" for="email">Email</label>
+            <input id="email" type="email" name="email" value="{{ old('email') }}"
+                   class="auth-input @error('email') has-error @enderror"
+                   placeholder="nama@email.com" required autofocus autocomplete="username">
+            @error('email')
+                <div class="auth-error">{{ $message }}</div>
+            @enderror
         </div>
 
-        <!-- Password -->
-        <div class="mt-4">
-            <x-input-label for="password" :value="__('Password')" />
-
-            <x-text-input id="password" class="block mt-1 w-full"
-                            type="password"
-                            name="password"
-                            required autocomplete="current-password" />
-
-            <x-input-error :messages="$errors->get('password')" class="mt-2" />
+        <div class="auth-field">
+            <label class="auth-label" for="password">Kata laluan</label>
+            <input id="password" type="password" name="password"
+                   class="auth-input @error('password') has-error @enderror"
+                   placeholder="••••••••" required autocomplete="current-password">
+            @error('password')
+                <div class="auth-error">{{ $message }}</div>
+            @enderror
         </div>
 
-        <!-- Remember Me -->
-        <div class="block mt-4">
-            <label for="remember_me" class="inline-flex items-center">
-                <input id="remember_me" type="checkbox" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" name="remember">
-                <span class="ms-2 text-sm text-gray-600">{{ __('Remember me') }}</span>
+        <div class="auth-row">
+            <label class="auth-check" for="remember_me">
+                <input id="remember_me" type="checkbox" name="remember">
+                Ingat saya
             </label>
-        </div>
 
-        <div class="flex items-center justify-end mt-4">
             @if (Route::has('password.request'))
-                <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('password.request') }}">
-                    {{ __('Forgot your password?') }}
-                </a>
+                <a class="auth-link" href="{{ route('password.request') }}">Lupa kata laluan?</a>
             @endif
-
-            <x-primary-button class="ms-3">
-                {{ __('Log in') }}
-            </x-primary-button>
         </div>
+
+        <button type="submit" class="auth-btn">Log masuk</button>
     </form>
+
+    <p class="auth-foot">
+        Belum ada akaun? <a href="{{ route('register') }}">Daftar percuma</a>
+    </p>
 </x-guest-layout>

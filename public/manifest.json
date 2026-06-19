@@ -1,0 +1,27 @@
+{
+    "name": "MakanMana — Cadangan Tempat Makan",
+    "short_name": "MakanMana",
+    "description": "Tak tahu nak makan apa? Biar MakanMana pilihkan tempat makan berdekatan anda.",
+    "start_url": "/",
+    "scope": "/",
+    "display": "standalone",
+    "orientation": "portrait-primary",
+    "background_color": "#fbf7f3",
+    "theme_color": "#ff5722",
+    "lang": "ms",
+    "categories": ["food", "lifestyle", "travel"],
+    "icons": [
+        {
+            "src": "/icons/icon.svg",
+            "sizes": "any",
+            "type": "image/svg+xml",
+            "purpose": "any"
+        },
+        {
+            "src": "/icons/icon-maskable.svg",
+            "sizes": "any",
+            "type": "image/svg+xml",
+            "purpose": "maskable"
+        }
+    ]
+}

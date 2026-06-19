@@ -2,86 +2,134 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Restaurant;
+use App\Models\User;
+use Illuminate\Support\Collection;
 
 class RecommendationController extends Controller
 {
-    public function index()
-    {
-        $restaurants = Restaurant::with('menus')->get();
-
-        return view('recommendation.index', compact('restaurants'));
-    }
-    public function surprise()
+    /**
+     * Laman utama / dashboard — peta penjelajah.
+     * Guest: pilihan rawak. Pengguna log masuk dengan citarasa: dipersonalisasi.
+     */
+    public function landing()
     {
         $user = auth()->user();
-        if (!$user) {
-            return redirect()->route('login');
+        $restaurants = Restaurant::with('menus')->get();
+
+        $personalised = false;
+        if ($user && $user->hasTastePreferences()) {
+            $restaurants = $this->applyPreferences($restaurants, $user)->values();
+            $personalised = true;
         }
 
-        $favFoods = $user->favorite_foods ?? [];
-        $allergies = $user->food_allergies ?? [];
+        return view('landing', compact('restaurants', 'personalised'));
+    }
 
-        $radius = 20;
+    public function index()
+    {
+        $user = auth()->user();
+        $restaurants = Restaurant::with('menus')->get();
 
-        $nearbyRestaurants = Restaurant::selectRaw(
-            "*, (
-        6371 * acos(
-            cos(radians(?)) * cos(radians(location_lat)) *
-            cos(radians(location_lng) - radians(?)) +
-            sin(radians(?)) * sin(radians(location_lat))
-        )
-    ) AS distance",
-            [$user->location_lat, $user->location_lng, $user->location_lat],
-        )
-            ->having('distance', '<', $radius)
-            ->get();
+        $personalised = false;
+        if ($user && $user->hasTastePreferences()) {
+            $restaurants = $this->applyPreferences($restaurants, $user)
+                ->sortBy([
+                    ['is_blocked', 'asc'],     // yang ada alahan ke bawah
+                    ['match_score', 'desc'],   // skor tertinggi di atas
+                ])
+                ->values();
+            $personalised = true;
+        }
 
-        $filtered = [];
+        return view('recommendation.index', compact('restaurants', 'personalised'));
+    }
 
-        foreach ($nearbyRestaurants as $restaurant) {
-            foreach ($restaurant->menus as $menu) {
-                $foodName = strtolower($menu->food_name);
-                $matchFav = collect($favFoods)->filter(fn($fav) => str_contains($foodName, strtolower($fav)))->isNotEmpty();
-                $hasAllergy = collect($allergies)->filter(fn($bad) => str_contains($foodName, strtolower($bad)))->isNotEmpty();
+    public function surprise()
+    {
+        return redirect()->route('recommendation.map');
+    }
 
-                if ($matchFav && !$hasAllergy) {
-                    $filtered[] = [
-                        'restaurant' => $restaurant,
-                        'menu' => $menu,
-                    ];
+    public function mapRecommendation()
+    {
+        $user = auth()->user();
+        $restaurants = Restaurant::with('menus')->get();
+
+        $personalised = false;
+        if ($user && $user->hasTastePreferences()) {
+            $restaurants = $this->applyPreferences($restaurants, $user)->values();
+            $personalised = true;
+        }
+
+        return view('recommendation.map', compact('restaurants', 'personalised'));
+    }
+
+    /**
+     * Kira skor padanan setiap restoran berdasarkan citarasa pengguna.
+     * Menambah atribut: match_score, is_match, is_blocked, match_reasons.
+     */
+    private function applyPreferences(Collection $restaurants, User $user): Collection
+    {
+        $favorites = collect($user->favorite_foods ?? [])->map(fn ($v) => mb_strtolower($v));
+        $allergies = collect($user->food_allergies ?? [])->map(fn ($v) => mb_strtolower($v));
+        $cuisines = collect($user->preferred_cuisines ?? [])->map(fn ($v) => mb_strtolower($v));
+        $budget = $user->budget;
+
+        return $restaurants->map(function ($r) use ($favorites, $allergies, $cuisines, $budget) {
+            $cuisineText = mb_strtolower($r->cuisine_type ?? '');
+            $menuText = mb_strtolower($r->menus->pluck('food_name')->implode(' | '));
+            $haystack = $cuisineText.' '.$menuText;
+
+            $score = 0;
+            $reasons = [];
+            $blocked = false;
+
+            // Alahan — sekat terus
+            foreach ($allergies as $a) {
+                if ($a !== '' && str_contains($haystack, $a)) {
+                    $blocked = true;
+                    break;
                 }
             }
-        }
 
-        if (empty($filtered)) {
-            return view('recommendation.surprise', [
-                'result' => null,
-                'allResults' => [],
-            ]);
-        }
+            // Makanan kegemaran dalam menu
+            foreach ($favorites as $f) {
+                if ($f !== '' && str_contains($menuText, $f)) {
+                    $score += 3;
+                    $reasons[] = '🍴 '.ucfirst($f);
+                }
+            }
 
-        return view('recommendation.surprise', [
-            'result' => collect($filtered)->random(),
-            'allResults' => $filtered,
-        ]);
+            // Jenis masakan kegemaran
+            foreach ($cuisines as $c) {
+                if ($c !== '' && str_contains($cuisineText, $c)) {
+                    $score += 4;
+                    $reasons[] = '🌏 '.ucfirst($c);
+                    break;
+                }
+            }
+
+            // Bajet — banding harga purata menu
+            if ($budget && $r->menus->count()) {
+                $avg = $r->menus->avg('price');
+                $fit = match ($budget) {
+                    'jimat' => $avg <= 15,
+                    'sederhana' => $avg > 15 && $avg <= 40,
+                    'mewah' => $avg > 40,
+                    default => false,
+                };
+                if ($fit) {
+                    $score += 2;
+                    $reasons[] = '💰 Sesuai bajet';
+                }
+            }
+
+            $r->match_score = $blocked ? -1 : $score;
+            $r->is_blocked = $blocked;
+            $r->is_match = ! $blocked && $score > 0;
+            $r->match_reasons = array_slice(array_values(array_unique($reasons)), 0, 3);
+
+            return $r;
+        });
     }
-
-public function mapRecommendation()
-{
-    // Ambil semua restoran (dummy kalau DB kosong)
-    $restaurants = Restaurant::with('menus')->get();
-
-    if ($restaurants->isEmpty()) {
-        $restaurants = collect([
-            (object) ['name' => 'Restoran A', 'address' => 'Alamat A', 'location_lat' => 3.1400, 'location_lng' => 101.6900],
-            (object) ['name' => 'Restoran B', 'address' => 'Alamat B', 'location_lat' => 3.1380, 'location_lng' => 101.6850],
-            (object) ['name' => 'Restoran C', 'address' => 'Alamat C', 'location_lat' => 3.1375, 'location_lng' => 101.6870],
-        ]);
-    }
-
-    return view('recommendation.map', compact('restaurants'));
-}
-
 }

@@ -6,7 +6,7 @@
                 <!-- Logo -->
                 <div class="shrink-0 flex items-center">
                     <a href="{{ route('dashboard') }}">
-                        <x-application-logo class="block h-9 w-auto fill-current text-gray-800" />
+                        <x-application-logo />
                     </a>
                 </div>
 
@@ -22,9 +22,9 @@
         {{ __('Recommendation') }}
     </x-nav-link>
 
-    <!-- Settings -->
-    <x-nav-link :href="route('profile.edit')" :active="request()->routeIs('profile.edit')">
-        {{ __('Settings') }}
+    <!-- Citarasa -->
+    <x-nav-link :href="route('preferences.edit')" :active="request()->routeIs('preferences.edit')">
+        {{ __('Citarasa') }}
     </x-nav-link>
 </div>
 
@@ -81,6 +81,12 @@
         <div class="pt-2 pb-3 space-y-1">
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                 {{ __('Dashboard') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('recommend.index')" :active="request()->routeIs('recommend.index')">
+                {{ __('Recommendation') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('preferences.edit')" :active="request()->routeIs('preferences.edit')">
+                {{ __('Citarasa') }}
             </x-responsive-nav-link>
         </div>
 

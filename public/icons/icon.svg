@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+    <defs>
+        <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#ff8a3d"/>
+            <stop offset="0.55" stop-color="#ff5722"/>
+            <stop offset="1" stop-color="#f7411e"/>
+        </linearGradient>
+    </defs>
+    <rect width="512" height="512" rx="112" fill="url(#g)"/>
+    <!-- plate -->
+    <circle cx="256" cy="256" r="132" fill="none" stroke="#ffffff" stroke-width="20" opacity="0.95"/>
+    <circle cx="256" cy="256" r="84" fill="none" stroke="#ffffff" stroke-width="12" opacity="0.6"/>
+    <!-- fork -->
+    <g fill="#ffffff">
+        <rect x="150" y="150" width="13" height="60" rx="6"/>
+        <rect x="173" y="150" width="13" height="60" rx="6"/>
+        <rect x="196" y="150" width="13" height="60" rx="6"/>
+        <rect x="161" y="205" width="37" height="20" rx="10"/>
+        <rect x="172" y="220" width="15" height="145" rx="7"/>
+    </g>
+    <!-- knife -->
+    <g fill="#ffffff">
+        <path d="M338 150 c26 0 30 70 18 120 c-4 16 -18 16 -18 0 z"/>
+        <rect x="331" y="255" width="15" height="110" rx="7"/>
+    </g>
+</svg>

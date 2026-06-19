@@ -23,7 +23,7 @@ class DatabaseSeeder extends Seeder
         // ]);
 
             $this->call([
-    RestaurantSeeder::class,
+    OsmRestaurantSeeder::class, // data restoran sebenar dari OpenStreetMap
     DummyUserSeeder::class,
 ]);
 
